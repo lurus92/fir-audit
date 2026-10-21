@@ -18,7 +18,7 @@ test('batch keeps going past blocked and broken sites, and summarises each', asy
   ];
   const tasks = [{ id: 'r', task: 'Wie lange ist die Rückgabe möglich?', intent: 'Support', keywords: ['rückgabe'] }];
   const reports = [];
-  const rows = await runBatch(sites, tasks, { delayMs: 0, dryRun: true, fetchImpl }, { onReport: async (s, r) => reports.push(r) });
+  const rows = await runBatch(sites, tasks, { delayMs: 0, minPages: 1, dryRun: true, fetchImpl }, { onReport: async (s, r) => reports.push(r) });
 
   assert.deepEqual(rows.map((r) => r.status), ['ok', 'blocked', 'unreachable']);
   assert.equal(rows[0].pages, 2);

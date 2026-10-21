@@ -5,7 +5,8 @@
   "type": "module",
   "bin": {
     "fir-audit": "bin/fir-audit.js",
-    "fir-batch": "bin/fir-batch.js"
+    "fir-batch": "bin/fir-batch.js",
+    "fir-access": "bin/fir-access.js"
   },
   "files": [
     "bin",

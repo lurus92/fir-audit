@@ -65,6 +65,8 @@ async function main() {
       console.log(`Not scored: ${url} refused the crawler (${report.access.reason}).`);
       console.log('The site blocks automated visitors, so no intent could be tested. This is recorded as');
       console.log('"blocked", not as a 100% Failed Intent Rate.');
+    } else if (report.access.status === 'insufficient') {
+      console.log(`Not scored: ${report.access.reason}. Static mode cannot audit this site yet.`);
     } else {
       console.log(`Not scored: ${url} could not be reached (${report.access.reason}).`);
     }

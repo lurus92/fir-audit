@@ -26,6 +26,7 @@ export function parseRobots(text, agent = 'fir-audit') {
   const specific = groups.filter((g) => g.agents.some((x) => x !== '*' && a.includes(x)));
   const chosen = specific.length ? specific : groups.filter((g) => g.agents.includes('*'));
   return {
+    matched: specific.length ? 'specific' : chosen.length ? 'wildcard' : 'none',
     rules: chosen.flatMap((g) => g.rules),
     crawlDelay: chosen.map((g) => g.crawlDelay).find((x) => x != null) ?? null,
   };
@@ -53,7 +54,7 @@ export async function fetchRobots(origin, { fetchImpl = fetch, userAgent } = {})
   try {
     const res = await fetchImpl(new URL('/robots.txt', origin).toString(), { headers: { 'User-Agent': userAgent } });
     if (!res.ok) return { rules: [], crawlDelay: null };
-    return parseRobots(await res.text());
+    return parseRobots(await res.text(), userAgent);
   } catch {
     return { rules: [], crawlDelay: null };
   }

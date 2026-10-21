@@ -25,7 +25,7 @@ test('end to end: crawl, judge with a stubbed LLM, score', async () => {
     { id: 'returns', task: 'What is the return policy?', intent: 'Support', keywords: ['return'] },
     { id: 'stores', task: 'Where are your physical stores?', intent: 'General', keywords: ['stores'] },
   ];
-  const report = await audit('https://shop.test/', tasks, { delayMs: 0, fetchImpl, llm: { apiKey: 'test' } });
+  const report = await audit('https://shop.test/', tasks, { delayMs: 0, minPages: 1, fetchImpl, llm: { apiKey: 'test' } });
   assert.equal(report.summary.total, 2);
   assert.equal(report.summary.failed, 1);
   assert.equal(report.summary.fir, 0.5);
@@ -46,12 +46,15 @@ test('a site that blocks the crawler is reported as blocked, never scored', asyn
   assert.equal(llmCalled, false);
 });
 
-test('a tiny crawl is scored but carries a warning', async () => {
+test('a crawl too thin to judge is marked insufficient and never scored', async () => {
+  let llmCalled = false;
   const site = fakeSite(pages);
-  const fetchImpl = async (url, init) => String(url).includes('/chat/completions')
-    ? { ok: true, json: async () => ({ choices: [{ message: { content: '{"fulfilled":true,"confidence":0.9}' } }] }) }
-    : site.fetchImpl(url, init);
+  const fetchImpl = async (url, init) => {
+    if (String(url).includes('/chat/completions')) llmCalled = true;
+    return site.fetchImpl(url, init);
+  };
   const report = await audit('https://shop.test/', [{ id: 'r', task: 'return policy', intent: 'Support', keywords: [] }], { delayMs: 0, fetchImpl, llm: { apiKey: 'test' } });
-  assert.equal(report.access.status, 'ok');
-  assert.equal(report.warnings.length, 1);
+  assert.equal(report.access.status, 'insufficient');
+  assert.equal(report.summary, null);
+  assert.equal(llmCalled, false);
 });

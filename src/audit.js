@@ -15,7 +15,7 @@ export async function loadTasks(path) {
 }
 
 export async function audit(url, tasks, opts = {}) {
-  const { maxPages = 40, delayMs = 1000, threshold = 0.6, dryRun = false, log = () => {}, fetchImpl = fetch } = opts;
+  const { maxPages = 40, delayMs = 1000, threshold = 0.6, minPages = MIN_PAGES, dryRun = false, log = () => {}, fetchImpl = fetch } = opts;
   const keywords = [...new Set(tasks.flatMap((t) => t.keywords))];
 
   log(`Crawling ${url} (max ${maxPages} pages, robots.txt respected)`);
@@ -32,16 +32,20 @@ export async function audit(url, tasks, opts = {}) {
 
   // A site that refuses the crawler has not failed any intent we can measure.
   // Scoring it would report a false 100% FIR, so record access, never a score.
-  // "blocked" means the site actively refused us (401/403/429 or robots.txt);
-  // anything else (DNS, timeouts, 5xx) is "unreachable" and says nothing about policy.
-  if (pages.length === 0) {
-    const reason = skipped[0]?.reason || 'no pages fetched';
-    const status = /^(401|403|429)\b|robots/.test(reason) ? 'blocked' : 'unreachable';
+  // blocked:      the site refused us (401/403/429 or robots.txt)
+  // unreachable:  DNS, TLS, timeouts, 5xx; says nothing about the site's policy
+  // insufficient: too few pages to judge (usually a JavaScript-rendered site)
+  // None of these are scored: an unmeasured site must never look like a 100% FIR.
+  if (pages.length < minPages) {
+    let status = 'insufficient';
+    let reason = `only ${pages.length} page(s) crawled; likely rendered with JavaScript`;
+    if (pages.length === 0) {
+      reason = skipped[0]?.reason || 'no pages fetched';
+      status = /^(401|403|429)\b|robots/.test(reason) ? 'blocked' : 'unreachable';
+    }
     return { ...base, access: { status, reason }, warnings: [], summary: null, results: [] };
   }
-  const warnings = pages.length < MIN_PAGES
-    ? [`Only ${pages.length} page(s) crawled. FIR on so small a sample is unreliable; do not publish it.`]
-    : [];
+  const warnings = [];
 
   const results = [];
   for (const task of tasks) {
