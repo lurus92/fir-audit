@@ -4,6 +4,7 @@
 // which otherwise eat the page budget.
 import { cleanHtml, extractTitle, extractLinks } from './html.js';
 import { fetchRobots, isAllowed } from './robots.js';
+import { sitemapUrls } from './sitemap.js';
 
 export const USER_AGENT = 'fir-audit/0.1 (+https://github.com/lurus92/fir-audit)';
 const SKIP_EXT = /\.(pdf|jpe?g|png|gif|svg|webp|avif|zip|mp4|mp3|css|js|json|xml|ico|woff2?)(\?|$)/i;
@@ -54,13 +55,23 @@ export function rankLinks(links, keywords, seen, host) {
     .sort((a, b) => b.score - a.score);
 }
 
-export async function crawl(startUrl, { maxPages = 40, keywords = [], delayMs = 1000, timeoutMs = 20000, fetchImpl = fetch, log = () => {} } = {}) {
+export async function crawl(startUrl, { maxPages = 40, keywords = [], delayMs = 1000, timeoutMs = 20000, useSitemap = true, sitemapSeeds = 15, fetchImpl = fetch, log = () => {} } = {}) {
   const start = new URL(startUrl);
   const robots = await fetchRobots(start.origin, { fetchImpl, userAgent: USER_AGENT });
   const delay = Math.max(delayMs, (robots.crawlDelay || 0) * 1000);
   const queue = [{ href: start.toString(), score: Infinity }];
   const seen = new Set([normalizeUrl(start.toString())]);
   const robotsByOrigin = new Map([[start.origin, robots]]);
+
+  // Seed the queue with the sitemap's most service-like pages.
+  if (useSitemap) {
+    const fromSitemap = await sitemapUrls(start.origin, robots.sitemaps, { fetchImpl, userAgent: USER_AGENT, timeoutMs });
+    const seeds = rankLinks(fromSitemap.map((href) => ({ href, text: '' })), keywords, seen, start.host)
+      .filter((l) => l.score >= 3)
+      .slice(0, sitemapSeeds);
+    for (const l of seeds) { seen.add(l.key); queue.push({ ...l, score: l.score + 3 }); }
+    if (fromSitemap.length) log(`  sitemap: ${fromSitemap.length} URLs, ${seeds.length} service pages queued`);
+  }
   const pages = [];
   const skipped = [];
 

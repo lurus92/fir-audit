@@ -3,6 +3,7 @@
 
 export function parseRobots(text, agent = 'fir-audit') {
   const groups = [];
+  const sitemaps = [];
   let cur = null;
   let lastWasAgent = false;
   for (const raw of String(text || '').split(/\r?\n/)) {
@@ -18,6 +19,7 @@ export function parseRobots(text, agent = 'fir-audit') {
       continue;
     }
     lastWasAgent = false;
+    if (key === 'sitemap') { if (/^https?:\/\//.test(val)) sitemaps.push(val); continue; }
     if (!cur) continue;
     if (key === 'allow' || key === 'disallow') cur.rules.push({ type: key, path: val });
     else if (key === 'crawl-delay') cur.crawlDelay = Number(val) || null;
@@ -26,6 +28,7 @@ export function parseRobots(text, agent = 'fir-audit') {
   const specific = groups.filter((g) => g.agents.some((x) => x !== '*' && a.includes(x)));
   const chosen = specific.length ? specific : groups.filter((g) => g.agents.includes('*'));
   return {
+    sitemaps,
     matched: specific.length ? 'specific' : chosen.length ? 'wildcard' : 'none',
     rules: chosen.flatMap((g) => g.rules),
     crawlDelay: chosen.map((g) => g.crawlDelay).find((x) => x != null) ?? null,
@@ -53,9 +56,9 @@ export function isAllowed(robots, path) {
 export async function fetchRobots(origin, { fetchImpl = fetch, userAgent } = {}) {
   try {
     const res = await fetchImpl(new URL('/robots.txt', origin).toString(), { headers: { 'User-Agent': userAgent } });
-    if (!res.ok) return { rules: [], crawlDelay: null };
+    if (!res.ok) return { rules: [], crawlDelay: null, sitemaps: [] };
     return parseRobots(await res.text(), userAgent);
   } catch {
-    return { rules: [], crawlDelay: null };
+    return { rules: [], crawlDelay: null, sitemaps: [] };
   }
 }
