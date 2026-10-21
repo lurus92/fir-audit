@@ -58,3 +58,12 @@ test('a crawl too thin to judge is marked insufficient and never scored', async 
   assert.equal(report.summary, null);
   assert.equal(llmCalled, false);
 });
+
+test('a crawl that reaches no help or policy page is not scored', async () => {
+  const site = fakeSite({ '/robots.txt': '', '/': '<title>Home</title><a href="/stories/run">Run</a>', '/stories/run': '<title>Running stories</title>' });
+  let llmCalled = false;
+  const fetchImpl = async (url, init) => { if (String(url).includes('/chat/completions')) llmCalled = true; return site.fetchImpl(url, init); };
+  const report = await audit('https://shop.test/', [{ id: 'r', task: 'return policy', intent: 'Support', keywords: [] }], { delayMs: 0, minPages: 1, fetchImpl, llm: { apiKey: 'test' } });
+  assert.equal(report.access.status, 'no-help-content');
+  assert.equal(llmCalled, false);
+});

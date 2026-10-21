@@ -65,6 +65,9 @@ async function main() {
       console.log(`Not scored: ${url} refused the crawler (${report.access.reason}).`);
       console.log('The site blocks automated visitors, so no intent could be tested. This is recorded as');
       console.log('"blocked", not as a 100% Failed Intent Rate.');
+    } else if (report.access.status === 'no-help-content') {
+      console.log(`Not scored: crawled ${report.crawl.pagesFetched} pages but reached no help or policy page.`);
+      console.log('An agent that reads HTML cannot find this site\'s service information. Recorded as a finding, not as a FIR.');
     } else if (report.access.status === 'insufficient') {
       console.log(`Not scored: ${report.access.reason}. Static mode cannot audit this site yet.`);
     } else {

@@ -12,6 +12,7 @@ export async function runBatch(sites, tasks, opts = {}, { onReport = async () =>
       await onReport(site, report);
       row.status = report.access.status;
       row.pages = report.crawl.pagesFetched;
+      row.service_pages = report.crawl.servicePages?.length ?? 0;
       row.tasks_matched = report.results.filter((r) => r.candidates?.length).length;
       row.tasks_total = tasks.length;
       if (report.summary) Object.assign(row, { fir: report.summary.fir, failed: report.summary.failed });
@@ -24,7 +25,7 @@ export async function runBatch(sites, tasks, opts = {}, { onReport = async () =>
   return rows;
 }
 
-const COLUMNS = ['name', 'url', 'country', 'type', 'size', 'status', 'pages', 'tasks_matched', 'tasks_total', 'fir', 'failed', 'note'];
+const COLUMNS = ['name', 'url', 'country', 'type', 'size', 'status', 'pages', 'service_pages', 'tasks_matched', 'tasks_total', 'fir', 'failed', 'note'];
 
 export function toCsv(rows) {
   const cell = (v) => {

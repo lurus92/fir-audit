@@ -9,6 +9,13 @@ import { sitemapUrls } from './sitemap.js';
 export const USER_AGENT = 'fir-audit/0.1 (+https://github.com/lurus92/fir-audit)';
 const SKIP_EXT = /\.(pdf|jpe?g|png|gif|svg|webp|avif|zip|mp4|mp3|css|js|json|xml|ico|woff2?)(\?|$)/i;
 const SERVICE_TERMS = ['hilfe', 'help', 'service', 'kundenservice', 'kundendienst', 'faq', 'support', 'kontakt', 'contact', 'policies', 'policy', 'agb', 'fragen', 'info'];
+// A crawled page that looks like help, policy or service content.
+export const SERVICE_PAGE = /hilfe|help|service|faq|support|kontakt|contact|polic|agb|versand|liefer|zahlung|payment|shipping|delivery|return|retour|rückgabe|rueckgabe|garantie|warranty|customer|kunden/i;
+export function isServicePage(page) {
+  let path = page.url;
+  try { path = decodeURIComponent(new URL(page.url).pathname); } catch {}
+  return SERVICE_PAGE.test(`${path} ${page.title || ''}`);
+}
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // help.example.com and www.example.com belong to the same site; so do shop.co.uk subdomains.

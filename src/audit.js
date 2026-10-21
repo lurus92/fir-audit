@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { crawl } from './crawl.js';
+import { crawl, isServicePage } from './crawl.js';
 import { rankPages } from './retrieve.js';
 import { judge } from './judge.js';
 import { classifyIntent } from './intent.js';
@@ -27,7 +27,7 @@ export async function audit(url, tasks, opts = {}) {
     auditedAt: new Date().toISOString(),
     mode: dryRun ? 'dry-run' : 'static',
     settings: { maxPages, threshold, model: dryRun ? null : opts.llm?.model },
-    crawl: { pagesFetched: pages.length, pagesSkipped: skipped.length, skipped },
+    crawl: { pagesFetched: pages.length, servicePages: pages.filter(isServicePage).map((p) => p.url), pagesSkipped: skipped.length, skipped },
   };
 
   // A site that refuses the crawler has not failed any intent we can measure.
@@ -45,7 +45,14 @@ export async function audit(url, tasks, opts = {}) {
     }
     return { ...base, access: { status, reason }, warnings: [], summary: null, results: [] };
   }
-  const warnings = [];
+  // Reached pages, but none of them help or policy content: any "failure" would
+  // be our crawler's, not the site's. Recorded as a finding, never scored.
+  if (base.crawl.servicePages.length === 0) {
+    return { ...base, access: { status: 'no-help-content', reason: 'no help or policy page reachable without JavaScript' }, warnings: [], summary: null, results: [] };
+  }
+  const warnings = base.crawl.servicePages.length < 3
+    ? [`Only ${base.crawl.servicePages.length} help/policy page(s) reached; failures may reflect crawl coverage.`]
+    : [];
 
   const results = [];
   for (const task of tasks) {

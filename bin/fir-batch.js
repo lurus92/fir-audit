@@ -59,5 +59,5 @@ for (const r of rows) {
   const fir = r.fir === undefined ? '' : `${Math.round(r.fir * 100)}%`;
   console.log(`${r.name.slice(0, 20).padEnd(20)} ${r.status.padEnd(8)} ${String(r.pages).padStart(5)}  ${r.tasks_matched === undefined ? '' : `${r.tasks_matched}/${r.tasks_total}`.padStart(7)}  ${fir}`);
 }
-console.log(`\n${rows.length} sites: ${count('ok')} audited, ${count('blocked')} blocked, ${count('unreachable')} unreachable, ${count('insufficient')} too thin to score, ${count('error')} errors`);
+console.log(`\n${rows.length} sites: ${count('ok')} audited, ${count('blocked')} blocked, ${count('unreachable')} unreachable, ${count('insufficient')} too thin to score, ${count('no-help-content')} without reachable help content, ${count('error')} errors`);
 console.log(`Summary: ${out}/summary.csv`);
