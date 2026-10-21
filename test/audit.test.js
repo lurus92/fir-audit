@@ -15,7 +15,7 @@ test('end to end: crawl, judge with a stubbed LLM, score', async () => {
     if (String(url).includes('/chat/completions')) {
       const asksReturns = JSON.parse(init.body).messages[1].content.includes('return');
       const verdict = asksReturns
-        ? { fulfilled: true, confidence: 0.9, evidence_url: 'https://shop.test/help/returns', answer: '30 days', reason: 'Policy states 30 days.' }
+        ? { fulfilled: true, confidence: 0.9, evidence_url: 'https://shop.test/help/returns', evidence_quote: 'within 30 days for a full refund', answer: '30 days', reason: 'Policy states 30 days.' }
         : { fulfilled: false, confidence: 0.8, evidence_url: null, answer: '', reason: 'Not found.' };
       return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(verdict) } }] }) };
     }

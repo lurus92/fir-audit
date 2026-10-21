@@ -23,3 +23,25 @@ export function rankPages(task, pages, k = 3) {
     .sort((a, b) => b.score - a.score)
     .slice(0, k);
 }
+
+// The parts of a page most relevant to a task, in page order, within a budget.
+// Policy pages are long; the answer is rarely in the first paragraph.
+export function excerpt(text, task, budget = 3000, window = 500) {
+  if (!text || text.length <= budget) return text || '';
+  const terms = [...new Set(tokenize(`${task.task} ${(task.keywords || []).join(' ')}`))];
+  const chunks = [];
+  for (let i = 0; i < text.length; i += window) chunks.push({ i, t: text.slice(i, i + window) });
+  const scored = chunks.map((c) => {
+    const low = c.t.toLowerCase();
+    return { ...c, s: terms.reduce((n, t) => n + low.split(t).length - 1, 0) };
+  });
+  const keep = new Set();
+  let used = 0;
+  for (const c of [...scored].sort((a, b) => b.s - a.s || a.i - b.i)) {
+    if (used + c.t.length > budget) break;
+    if (c.s === 0 && keep.size) break;
+    keep.add(c.i);
+    used += c.t.length;
+  }
+  return scored.filter((c) => keep.has(c.i)).map((c) => c.t).join(' … ');
+}
