@@ -1,0 +1,16 @@
+{
+  "name": "UK and UAE candidates (2027 expansion, access test only for now)",
+  "notes": "Landmark Group, Alshaya and Apparel Group brands deliberately excluded (employer/prospective-employer conflict).",
+  "sites": [
+    { "name": "Next", "url": "https://www.next.co.uk", "country": "UK", "type": "retailer", "size": "large" },
+    { "name": "John Lewis", "url": "https://www.johnlewis.com", "country": "UK", "type": "department store", "size": "large" },
+    { "name": "Argos", "url": "https://www.argos.co.uk", "country": "UK", "type": "retailer", "size": "large" },
+    { "name": "Boots", "url": "https://www.boots.com", "country": "UK", "type": "retailer", "size": "large" },
+    { "name": "Gymshark", "url": "https://www.gymshark.com", "country": "UK", "type": "DTC brand", "size": "mid" },
+    { "name": "Noon", "url": "https://www.noon.com/uae-en", "country": "UAE", "type": "marketplace", "size": "large" },
+    { "name": "Namshi", "url": "https://www.namshi.com", "country": "UAE", "type": "retailer", "size": "large" },
+    { "name": "Sharaf DG", "url": "https://uae.sharafdg.com", "country": "UAE", "type": "retailer", "size": "large" },
+    { "name": "Ounass", "url": "https://www.ounass.ae", "country": "UAE", "type": "retailer", "size": "mid" },
+    { "name": "Carrefour UAE", "url": "https://www.carrefouruae.com", "country": "UAE", "type": "retailer", "size": "large" }
+  ]
+}

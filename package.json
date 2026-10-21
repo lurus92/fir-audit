@@ -3,12 +3,36 @@
   "version": "0.1.0",
   "description": "Measure the Failed Intent Rate of any website: how often visitors and AI agents can't get what they came for.",
   "type": "module",
-  "bin": { "fir-audit": "bin/fir-audit.js" },
-  "files": ["bin", "src", "tasks"],
-  "scripts": { "test": "node --test" },
-  "engines": { "node": ">=20" },
-  "keywords": ["analytics", "failed-intent-rate", "fir", "ai-agents", "webmcp", "cro", "audit", "llm"],
+  "bin": {
+    "fir-audit": "bin/fir-audit.js",
+    "fir-batch": "bin/fir-batch.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "tasks",
+    "sites"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "analytics",
+    "failed-intent-rate",
+    "fir",
+    "ai-agents",
+    "webmcp",
+    "cro",
+    "audit",
+    "llm"
+  ],
   "author": "Luigi Russo (https://lrusso.it)",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/lurus92/fir-audit.git" }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lurus92/fir-audit.git"
+  }
 }

@@ -75,6 +75,20 @@ Try it without an API key: `--dry-run` crawls the site and shows which page woul
 | `--out <file>` | `fir-<host>-<date>.json` | Full JSON report with evidence |
 | `--dry-run` | | No LLM calls |
 
+## Audit many sites
+
+```bash
+node bin/fir-batch.js sites/dach-pilot.json --tasks tasks/dach-ecommerce.json --dry-run
+```
+
+Sites are audited one at a time, never in parallel. Each gets a JSON report, and `summary.csv` holds one row per site. A site lands in one of three states:
+
+- **ok**: crawled and scored
+- **blocked**: the site refused the crawler (401/403/429 or robots.txt). Recorded, never scored
+- **unreachable**: DNS, timeout or server errors. Says nothing about the site's policy
+
+Included: `sites/dach-pilot.json` (20 DACH shops) with `tasks/dach-ecommerce.json` (10 intents, German and English keywords).
+
 ## How it works
 
 1. **Crawl, politely.** Same-site pages only, `robots.txt` respected (including `Crawl-delay`), at most one request per second by default, identified as `fir-audit/0.1 (+https://github.com/lurus92/fir-audit)`. Links that match the tasks' keywords are fetched first, so a small page budget covers the pages that matter.

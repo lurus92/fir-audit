@@ -1,0 +1,16 @@
+{
+  "name": "DACH e-commerce baseline",
+  "description": "Ten pre- and post-purchase intents. Costs, delivery speed, returns policy and payment methods are among the top checkout-abandonment reasons in Baymard Institute research; invoice payment (Kauf auf Rechnung) is a DACH-specific expectation. Keywords are German and English because the sites are mostly German-language.",
+  "tasks": [
+    { "id": "returns-window", "task": "How many days do I have to return an item?", "intent": "Support", "keywords": ["return", "returns", "rückgabe", "retoure", "retouren", "rücksendung", "umtausch", "widerruf"] },
+    { "id": "returns-cost", "task": "Are returns free, or do I have to pay for return shipping?", "intent": "Pricing", "keywords": ["rücksendung", "retoure", "retourenkosten", "kostenlos", "gratis", "returns"] },
+    { "id": "shipping-cost", "task": "How much does shipping cost, and from what order value is it free?", "intent": "Pricing", "keywords": ["versand", "versandkosten", "lieferkosten", "porto", "gratis", "kostenlos", "shipping"] },
+    { "id": "delivery-time", "task": "How long does standard delivery take?", "intent": "Support", "keywords": ["lieferzeit", "lieferung", "lieferfrist", "versand", "werktage", "delivery"] },
+    { "id": "countries", "task": "Which countries do you deliver to?", "intent": "Product research", "keywords": ["lieferländer", "länder", "ausland", "international", "schweiz", "österreich", "deutschland"] },
+    { "id": "payment-methods", "task": "Which payment methods do you accept?", "intent": "Pricing", "keywords": ["zahlung", "zahlungsarten", "zahlungsmöglichkeiten", "bezahlen", "twint", "paypal", "kreditkarte", "payment"] },
+    { "id": "invoice", "task": "Can I pay by invoice (Kauf auf Rechnung)?", "intent": "Pricing", "keywords": ["rechnung", "kauf auf rechnung", "invoice", "klarna", "powerpay", "zahlungsarten"] },
+    { "id": "contact", "task": "How can I reach customer service, and when are they available?", "intent": "Support", "keywords": ["kontakt", "kundenservice", "kundendienst", "hilfe", "telefon", "öffnungszeiten", "contact"] },
+    { "id": "track-order", "task": "How do I track my order?", "intent": "Support", "keywords": ["sendungsverfolgung", "bestellstatus", "tracking", "bestellung", "verfolgen", "paket"] },
+    { "id": "warranty", "task": "How long is the warranty, and how do I make a warranty claim?", "intent": "Support", "keywords": ["garantie", "gewährleistung", "reparatur", "defekt", "warranty"] }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "DACH e-commerce pilot (MeasureCamp Zurich, Nov 2026)",
+  "notes": "12 CH / 5 DE / 3 AT. Mix of marketplaces, retailers and DTC brands, large and mid-market. DE/AT shops chosen partly because Swiss shoppers buy cross-border from them.",
+  "sites": [
+    { "name": "Galaxus", "url": "https://www.galaxus.ch", "country": "CH", "type": "marketplace", "size": "large" },
+    { "name": "Brack.ch", "url": "https://www.brack.ch", "country": "CH", "type": "retailer", "size": "large" },
+    { "name": "Interdiscount", "url": "https://www.interdiscount.ch", "country": "CH", "type": "retailer", "size": "large" },
+    { "name": "Fust", "url": "https://www.fust.ch", "country": "CH", "type": "retailer", "size": "large" },
+    { "name": "Manor", "url": "https://www.manor.ch", "country": "CH", "type": "department store", "size": "large" },
+    { "name": "Zalando CH", "url": "https://www.zalando.ch", "country": "CH", "type": "marketplace", "size": "large", "note": "Known to return 403 to the crawler (21 Oct 2026); kept as the access-blocked reference" },
+    { "name": "Ochsner Sport", "url": "https://www.ochsnersport.ch", "country": "CH", "type": "retailer", "size": "mid" },
+    { "name": "Transa", "url": "https://www.transa.ch", "country": "CH", "type": "retailer", "size": "mid" },
+    { "name": "Bächli Bergsport", "url": "https://www.baechli-bergsport.ch", "country": "CH", "type": "retailer", "size": "mid" },
+    { "name": "Freitag", "url": "https://www.freitag.ch", "country": "CH", "type": "DTC brand", "size": "mid" },
+    { "name": "On", "url": "https://www.on.com", "country": "CH", "type": "DTC brand", "size": "large" },
+    { "name": "Mammut", "url": "https://www.mammut.com", "country": "CH", "type": "DTC brand", "size": "mid" },
+    { "name": "Otto", "url": "https://www.otto.de", "country": "DE", "type": "marketplace", "size": "large" },
+    { "name": "MediaMarkt DE", "url": "https://www.mediamarkt.de", "country": "DE", "type": "retailer", "size": "large" },
+    { "name": "Tchibo", "url": "https://www.tchibo.de", "country": "DE", "type": "retailer", "size": "large" },
+    { "name": "About You", "url": "https://www.aboutyou.de", "country": "DE", "type": "retailer", "size": "large" },
+    { "name": "Bergfreunde", "url": "https://www.bergfreunde.de", "country": "DE", "type": "retailer", "size": "mid" },
+    { "name": "XXXLutz AT", "url": "https://www.xxxlutz.at", "country": "AT", "type": "retailer", "size": "large" },
+    { "name": "Hervis", "url": "https://www.hervis.at", "country": "AT", "type": "retailer", "size": "mid" },
+    { "name": "Blue Tomato", "url": "https://www.blue-tomato.com", "country": "AT", "type": "retailer", "size": "mid" }
+  ]
+}

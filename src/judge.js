@@ -2,6 +2,8 @@
 // task. Works with any OpenAI-compatible Chat Completions endpoint.
 const SYSTEM = `You audit whether a website's public content lets a visitor complete a task.
 Use ONLY the page excerpts provided. Do not use outside knowledge about the company.
+Pages may be in German, French, Italian or English; the task does not need to
+be in the same language as the page. Write your reason in English.
 The task is fulfilled only if the excerpts contain a specific, usable answer
 (a policy, a number, a contact route, a step-by-step path), not a vague mention.
 Reply with JSON only:

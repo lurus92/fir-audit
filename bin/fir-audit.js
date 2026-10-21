@@ -59,11 +59,15 @@ async function main() {
   const out = args.out || `fir-${host}-${report.auditedAt.slice(0, 10)}.json`;
   console.log('');
 
-  if (report.access.status === 'blocked') {
+  if (report.access.status !== 'ok') {
     await writeFile(out, JSON.stringify(report, null, 2));
-    console.log(`Not scored: ${url} refused the crawler (${report.access.reason}).`);
-    console.log('The site blocks automated visitors, so no intent could be tested. This is recorded as');
-    console.log('"blocked", not as a 100% Failed Intent Rate.');
+    if (report.access.status === 'blocked') {
+      console.log(`Not scored: ${url} refused the crawler (${report.access.reason}).`);
+      console.log('The site blocks automated visitors, so no intent could be tested. This is recorded as');
+      console.log('"blocked", not as a 100% Failed Intent Rate.');
+    } else {
+      console.log(`Not scored: ${url} could not be reached (${report.access.reason}).`);
+    }
     console.log(`\nReport: ${out}`);
     process.exit(2);
   }

@@ -32,8 +32,12 @@ export async function audit(url, tasks, opts = {}) {
 
   // A site that refuses the crawler has not failed any intent we can measure.
   // Scoring it would report a false 100% FIR, so record access, never a score.
+  // "blocked" means the site actively refused us (401/403/429 or robots.txt);
+  // anything else (DNS, timeouts, 5xx) is "unreachable" and says nothing about policy.
   if (pages.length === 0) {
-    return { ...base, access: { status: 'blocked', reason: skipped[0]?.reason || 'no pages fetched' }, warnings: [], summary: null, results: [] };
+    const reason = skipped[0]?.reason || 'no pages fetched';
+    const status = /^(401|403|429)\b|robots/.test(reason) ? 'blocked' : 'unreachable';
+    return { ...base, access: { status, reason }, warnings: [], summary: null, results: [] };
   }
   const warnings = pages.length < MIN_PAGES
     ? [`Only ${pages.length} page(s) crawled. FIR on so small a sample is unreliable; do not publish it.`]
