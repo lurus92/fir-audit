@@ -55,7 +55,20 @@ async function main() {
     log: (m) => console.error(m),
   });
 
+  const host = new URL(url).host.replace(/^www\./, '');
+  const out = args.out || `fir-${host}-${report.auditedAt.slice(0, 10)}.json`;
   console.log('');
+
+  if (report.access.status === 'blocked') {
+    await writeFile(out, JSON.stringify(report, null, 2));
+    console.log(`Not scored: ${url} refused the crawler (${report.access.reason}).`);
+    console.log('The site blocks automated visitors, so no intent could be tested. This is recorded as');
+    console.log('"blocked", not as a 100% Failed Intent Rate.');
+    console.log(`\nReport: ${out}`);
+    process.exit(2);
+  }
+  for (const w of report.warnings) console.log(`Warning: ${w}\n`);
+
   if (report.summary) {
     const s = report.summary;
     console.log(`Failed Intent Rate  ${pct(s.fir).trim()}   ${s.failed} of ${s.total} intents failed   ${url}\n`);
@@ -69,8 +82,6 @@ async function main() {
     for (const r of report.results) console.log(`  ${r.id.padEnd(16)} ${r.candidates[0] || '(no matching page)'}`);
   }
 
-  const host = new URL(url).host.replace(/^www\./, '');
-  const out = args.out || `fir-${host}-${report.auditedAt.slice(0, 10)}.json`;
   await writeFile(out, JSON.stringify(report, null, 2));
   console.log(`\nReport: ${out}`);
 }

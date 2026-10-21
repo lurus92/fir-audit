@@ -31,3 +31,27 @@ test('end to end: crawl, judge with a stubbed LLM, score', async () => {
   assert.equal(report.summary.fir, 0.5);
   assert.equal(report.results.find((r) => r.id === 'stores').reason, 'No crawled page matched this task.');
 });
+
+test('a site that blocks the crawler is reported as blocked, never scored', async () => {
+  let llmCalled = false;
+  const fetchImpl = async (url) => {
+    if (String(url).includes('/chat/completions')) llmCalled = true;
+    return { ok: false, status: 403, headers: { get: () => 'text/html' }, text: async () => 'Access denied' };
+  };
+  const tasks = [{ id: 'returns', task: 'What is the return policy?', intent: 'Support', keywords: [] }];
+  const report = await audit('https://blocked.test/', tasks, { delayMs: 0, fetchImpl, llm: { apiKey: 'test' } });
+  assert.equal(report.access.status, 'blocked');
+  assert.match(report.access.reason, /403/);
+  assert.equal(report.summary, null);
+  assert.equal(llmCalled, false);
+});
+
+test('a tiny crawl is scored but carries a warning', async () => {
+  const site = fakeSite(pages);
+  const fetchImpl = async (url, init) => String(url).includes('/chat/completions')
+    ? { ok: true, json: async () => ({ choices: [{ message: { content: '{"fulfilled":true,"confidence":0.9}' } }] }) }
+    : site.fetchImpl(url, init);
+  const report = await audit('https://shop.test/', [{ id: 'r', task: 'return policy', intent: 'Support', keywords: [] }], { delayMs: 0, fetchImpl, llm: { apiKey: 'test' } });
+  assert.equal(report.access.status, 'ok');
+  assert.equal(report.warnings.length, 1);
+});
