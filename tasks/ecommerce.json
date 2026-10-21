@@ -1,0 +1,16 @@
+{
+  "name": "E-commerce baseline",
+  "description": "Ten things a typical shopper (or their AI agent) tries to find on a retail site before buying.",
+  "tasks": [
+    { "id": "returns", "task": "What is the return policy, and how many days do I have to return an item?", "keywords": ["return", "returns", "refund", "exchange"] },
+    { "id": "shipping-intl", "task": "Do you ship to Switzerland, and what does it cost?", "keywords": ["shipping", "delivery", "international", "countries", "switzerland"] },
+    { "id": "delivery-time", "task": "How long does standard delivery take?", "keywords": ["delivery", "shipping", "days", "dispatch"] },
+    { "id": "payment", "task": "Which payment methods do you accept?", "keywords": ["payment", "pay", "card", "paypal", "klarna"] },
+    { "id": "contact", "task": "How can I contact customer support, and when are you available?", "keywords": ["contact", "support", "help", "customer", "service"] },
+    { "id": "track-order", "task": "How do I track my order?", "keywords": ["track", "tracking", "order", "status"] },
+    { "id": "warranty", "task": "Do products come with a warranty or guarantee, and for how long?", "keywords": ["warranty", "guarantee", "repair"] },
+    { "id": "size-guide", "task": "Where is the size guide or product specifications?", "keywords": ["size", "sizing", "guide", "fit", "specifications"] },
+    { "id": "discounts", "task": "Are there any current discounts, promo codes or a first-order offer?", "keywords": ["discount", "sale", "promo", "offer", "newsletter"] },
+    { "id": "stores", "task": "Do you have physical stores, and where?", "keywords": ["store", "stores", "locator", "shop", "locations"] }
+  ]
+}
