@@ -3,6 +3,28 @@
 import { excerpt } from './retrieve.js';
 import { decodeEntities } from './html.js';
 
+const norm = (x) => decodeEntities(String(x || '')).normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+// The judge often joins non-adjacent passages with "..." (22 Oct run: 15 of 15
+// rejected quotes were real text stitched this way). Each fragment must appear
+// in the excerpts; a fragment of 3+ words may differ by at most 20% of its
+// 3-word sequences (the judge trims clauses), never be invented.
+export function verifyQuote(quote, text) {
+  if (!quote) return false;
+  const t = norm(text);
+  const frags = String(quote).split(/\.{3,}|…/).map(norm).filter((f) => f.length >= 3);
+  if (!frags.length) return false;
+  return frags.every((f) => {
+    if (t.includes(f)) return true;
+    const w = f.split(' ');
+    if (w.length < 5) return false;
+    const grams = w.length - 2;
+    let hit = 0;
+    for (let i = 0; i < grams; i++) if (t.includes(w.slice(i, i + 3).join(' '))) hit += 1;
+    return hit / grams >= 0.8;
+  });
+}
+
 const SYSTEM = `You audit whether a website's public content lets a visitor complete a task.
 Use ONLY the page excerpts provided. Do not use outside knowledge about the company.
 Pages may be in German, French, Italian or English; the task does not need to
@@ -44,9 +66,8 @@ export async function judge(task, candidates, { apiKey, model = 'gpt-4o-mini', b
   const data = await res.json();
   const out = JSON.parse(data.choices?.[0]?.message?.content || '{}');
   // A pass must be backed by a quote that really is in what the judge was shown.
-  const norm = (x) => decodeEntities(String(x || '')).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
   const quote = out.evidence_quote ? String(out.evidence_quote) : null;
-  const quoteFound = Boolean(quote) && norm(passages.join(' ')).includes(norm(quote));
+  const quoteFound = verifyQuote(quote, passages.join(' '));
   const fulfilled = Boolean(out.fulfilled) && quoteFound;
   return {
     fulfilled,

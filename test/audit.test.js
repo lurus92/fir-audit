@@ -25,7 +25,7 @@ test('end to end: crawl, judge with a stubbed LLM, score', async () => {
     { id: 'returns', task: 'What is the return policy?', intent: 'Support', keywords: ['return'] },
     { id: 'stores', task: 'Where are your physical stores?', intent: 'General', keywords: ['stores'] },
   ];
-  const report = await audit('https://shop.test/', tasks, { delayMs: 0, minPages: 1, fetchImpl, llm: { apiKey: 'test' } });
+  const report = await audit('https://shop.test/', tasks, { delayMs: 0, minPages: 1, minServicePages: 1, fetchImpl, llm: { apiKey: 'test' } });
   assert.equal(report.summary.total, 2);
   assert.equal(report.summary.failed, 1);
   assert.equal(report.summary.fir, 0.5);

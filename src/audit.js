@@ -7,6 +7,7 @@ import { failedIntentRate } from './score.js';
 
 export const VERSION = '0.1.0';
 export const MIN_PAGES = 5;
+export const MIN_SERVICE_PAGES = 5;
 
 export async function loadTasks(path) {
   const raw = JSON.parse(await readFile(path, 'utf8'));
@@ -15,7 +16,7 @@ export async function loadTasks(path) {
 }
 
 export async function audit(url, tasks, opts = {}) {
-  const { maxPages = 40, delayMs = 1000, threshold = 0.6, minPages = MIN_PAGES, dryRun = false, log = () => {}, fetchImpl = fetch } = opts;
+  const { maxPages = 40, delayMs = 1000, threshold = 0.6, minPages = MIN_PAGES, minServicePages = MIN_SERVICE_PAGES, dryRun = false, log = () => {}, fetchImpl = fetch } = opts;
   const keywords = [...new Set(tasks.flatMap((t) => t.keywords))];
 
   log(`Crawling ${url} (max ${maxPages} pages, robots.txt respected)`);
@@ -50,9 +51,10 @@ export async function audit(url, tasks, opts = {}) {
   if (base.crawl.servicePages.length === 0) {
     return { ...base, access: { status: 'no-help-content', reason: 'no help or policy page reachable without JavaScript' }, warnings: [], summary: null, results: [] };
   }
-  const warnings = base.crawl.servicePages.length < 3
-    ? [`Only ${base.crawl.servicePages.length} help/policy page(s) reached; failures may reflect crawl coverage.`]
-    : [];
+  if (base.crawl.servicePages.length < minServicePages) {
+    return { ...base, access: { status: 'low-coverage', reason: `only ${base.crawl.servicePages.length} help/policy page(s) reachable without JavaScript` }, warnings: [], summary: null, results: [] };
+  }
+  const warnings = [];
 
   const results = [];
   for (const task of tasks) {
