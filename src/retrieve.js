@@ -6,7 +6,17 @@ export function tokenize(s) {
   return (String(s || '').toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).filter((t) => t.length > 2 && !STOP.has(t));
 }
 
-export function rankPages(task, pages, k = 3) {
+// The same page in another locale (/de-CH/ vs /de-DE/, /fr/ vs /de/) wastes a
+// slot the judge could spend on a different page.
+export function localeKey(url) {
+  try {
+    const u = new URL(url);
+    const path = u.pathname.replace(/\/(?:[a-z]{2}(?:[-_][a-z]{2})?)(?=\/|$)/gi, '').replace(/\/+$/, '');
+    return `${u.host.replace(/^www\./, '')}${path}`.toLowerCase();
+  } catch { return url; }
+}
+
+export function rankPages(task, pages, k = 5) {
   const terms = [...new Set(tokenize(`${task.task} ${(task.keywords || []).join(' ')}`))];
   const docs = pages.map((p) => ({ page: p, title: tokenize(p.title), url: tokenize(p.url), text: tokenize(p.text) }));
   const df = Object.fromEntries(terms.map((t) => [t, docs.filter((d) => d.text.includes(t) || d.title.includes(t) || d.url.includes(t)).length]));
@@ -21,6 +31,7 @@ export function rankPages(task, pages, k = 3) {
     })
     .filter((p) => p.score > 0)
     .sort((a, b) => b.score - a.score)
+    .filter((p, i, all) => all.findIndex((q) => localeKey(q.url) === localeKey(p.url)) === i)
     .slice(0, k);
 }
 

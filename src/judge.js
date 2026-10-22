@@ -12,16 +12,23 @@ const norm = (x) => decodeEntities(String(x || '')).normalize('NFC').toLowerCase
 export function verifyQuote(quote, text) {
   if (!quote) return false;
   const t = norm(text);
-  const frags = String(quote).split(/\.{3,}|…/).map(norm).filter((f) => f.length >= 3);
+  const pairs = String(quote).split(/\.{3,}|…/).map((raw) => ({ raw, f: norm(raw) })).filter((p) => p.f.length >= 3);
+  const frags = pairs.map((p) => p.f);
+  const rawFrags = pairs.map((p) => p.raw);
   if (!frags.length) return false;
-  return frags.every((f) => {
+  return frags.every((raw, idx) => {
+    const f = raw;
     if (t.includes(f)) return true;
     const w = f.split(' ');
     if (w.length < 5) return false;
     const grams = w.length - 2;
     let hit = 0;
     for (let i = 0; i < grams; i++) if (t.includes(w.slice(i, i + 3).join(' '))) hit += 1;
-    return hit / grams >= 0.8;
+    if (hit / grams >= 0.8) return true;
+    // A condensed list ("Kreditkarte (Visa und Mastercard), PayPal, Kauf auf
+    // Rechnung"): accept when every item is on the page.
+    const items = (rawFrags[idx] ?? '').split(/[,;:()]|\bund\b|\band\b|\bet\b|\be\b/i).map(norm).filter((x) => x.length >= 3);
+    return items.length >= 2 && items.every((x) => t.includes(x));
   });
 }
 
@@ -35,6 +42,8 @@ The answer must be about exactly what was asked: a product warranty, not a
 credit-card insurance; payment methods for placing an order, not how refunds
 are paid back; this shop's delivery countries, not a mention of a country.
 If you would have to infer or guess, it is not fulfilled.
+A restrictive answer IS an answer: "we deliver only within Germany", "no
+invoice payment", "returns are not free" all fulfil the task.
 If fulfilled, evidence_quote must be copied verbatim from the excerpts, in the
 page's language, at most 30 words.
 Reply with JSON only:

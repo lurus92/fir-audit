@@ -10,13 +10,18 @@ const n = Number(rest[rest.indexOf('--n') + 1]) || 50;
 const COLS = ['n', 'site', 'task_id', 'task', 'judge', 'confidence', 'evidence_url', 'evidence_quote', 'reason', 'pages_shown', 'human', 'note'];
 const cell = (v) => { const s = String(v ?? ''); return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 
+// Excel re-saves CSVs with ";" in DACH locales and drops quoting, so the
+// delimiter is detected from the header line, never assumed.
 function parseCsv(text) {
+  text = text.replace(/^\uFEFF/, '');
+  const firstLine = text.slice(0, text.indexOf('\n'));
+  const sep = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
   const rows = []; let row = []; let f = ''; let q = false;
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
     if (q) { if (ch === '"' && text[i + 1] === '"') { f += '"'; i++; } else if (ch === '"') q = false; else f += ch; }
     else if (ch === '"') q = true;
-    else if (ch === ',' || ch === ';') { row.push(f); f = ''; }
+    else if (ch === sep) { row.push(f); f = ''; }
     else if (ch === '\n') { row.push(f.replace(/\r$/, '')); rows.push(row); row = []; f = ''; }
     else f += ch;
   }
