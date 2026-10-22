@@ -1,12 +1,33 @@
 // HTML helpers. Adapted from FunnelScan (backend/utils/cleanHtml.js and
 // backend/services/fetchWebsite.js).
 
-const ENTITIES = { '&nbsp;': ' ', '&amp;': '&', '&quot;': '"', '&#39;': "'", '&lt;': '<', '&gt;': '>' };
+// Named entities common on DACH/FR/IT/UK shop pages, plus all numeric ones.
+// Undecoded entities broke both retrieval ("r&uuml;ckgabe" never matched
+// "rückgabe") and quote verification in the first DACH run.
+const NAMED = {
+  nbsp: ' ', amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', shy: '',
+  auml: 'ä', ouml: 'ö', uuml: 'ü', Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü', szlig: 'ß',
+  eacute: 'é', egrave: 'è', ecirc: 'ê', euml: 'ë', Eacute: 'É', Egrave: 'È',
+  aacute: 'á', agrave: 'à', acirc: 'â', Agrave: 'À', iacute: 'í', igrave: 'ì', icirc: 'î', iuml: 'ï',
+  oacute: 'ó', ograve: 'ò', ocirc: 'ô', uacute: 'ú', ugrave: 'ù', ucirc: 'û', ccedil: 'ç', Ccedil: 'Ç', ntilde: 'ñ',
+  euro: '€', pound: '£', cent: '¢', yen: '¥', copy: '©', reg: '®', trade: '™', deg: '°', sect: '§', para: '¶',
+  ndash: '–', mdash: '—', hellip: '…', bull: '•', middot: '·', times: '×', divide: '÷', plusmn: '±',
+  laquo: '«', raquo: '»', lsaquo: '‹', rsaquo: '›', ldquo: '“', rdquo: '”', bdquo: '„', lsquo: '‘', rsquo: '’', sbquo: '‚',
+  thinsp: ' ', ensp: ' ', emsp: ' ', zwnj: '', zwj: '',
+};
+
+export function decodeEntities(s) {
+  return String(s ?? '').replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]*);/gi, (m, e) => {
+    if (e[0] === '#') {
+      const code = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      try { return String.fromCodePoint(code); } catch { return ' '; }
+    }
+    return NAMED[e] ?? NAMED[e.toLowerCase()] ?? m;
+  });
+}
 
 function toText(html, limit) {
-  return html
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&(nbsp|amp|quot|#39|lt|gt);/gi, (m) => ENTITIES[m.toLowerCase()] ?? ' ')
+  return decodeEntities(html.replace(/<[^>]+>/g, ' '))
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, limit);
@@ -18,6 +39,7 @@ function toText(html, limit) {
 export function cleanHtml(html, limit = 20000) {
   if (!html || typeof html !== 'string') return '';
   const body = html
+    .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')

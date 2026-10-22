@@ -6,7 +6,7 @@ import { fakeSite } from './helpers.js';
 const pages = {
   '/robots.txt': '',
   '/': '<title>Shop</title><a href="/help/returns">Returns</a>',
-  '/help/returns': '<title>Returns</title><p>Return any item within 30 days for a full refund.</p>',
+  '/help/returns': '<title>Returns</title><p>Return any item within 30 days for a full refund. Weitere Informationen zu Fristen, Kosten und Ablauf findest du in unseren Servicebedingungen. Weitere Informationen zu Fristen, Kosten und Ablauf findest du in unseren Servicebedingungen. Weitere Informationen zu Fristen, Kosten und Ablauf findest du in unseren Servicebedingungen.</p>',
 };
 
 test('end to end: crawl, judge with a stubbed LLM, score', async () => {

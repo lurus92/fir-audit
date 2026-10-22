@@ -4,7 +4,7 @@ import { runBatch, toCsv } from '../src/batch.js';
 import { fakeSite } from './helpers.js';
 
 test('batch keeps going past blocked and broken sites, and summarises each', async () => {
-  const good = fakeSite({ '/robots.txt': '', '/': '<title>Shop</title><a href="/rueckgabe">Rückgabe</a>', '/rueckgabe': '<title>Rückgabe</title><p>30 Tage Rückgaberecht.</p>' });
+  const good = fakeSite({ '/robots.txt': '', '/': '<title>Shop</title><a href="/rueckgabe">Rückgabe</a>', '/rueckgabe': '<title>Rückgabe</title><p>30 Tage Rückgaberecht. Weitere Informationen zu Fristen, Kosten und Ablauf findest du in unseren Servicebedingungen. Weitere Informationen zu Fristen, Kosten und Ablauf findest du in unseren Servicebedingungen. Weitere Informationen zu Fristen, Kosten und Ablauf findest du in unseren Servicebedingungen.</p>' });
   const fetchImpl = async (url, init) => {
     const host = new URL(url).host;
     if (host === 'blocked.test') return { ok: false, status: 403, headers: { get: () => 'text/html' }, text: async () => '' };

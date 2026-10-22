@@ -11,9 +11,12 @@ const SKIP_EXT = /\.(pdf|jpe?g|png|gif|svg|webp|avif|zip|mp4|mp3|css|js|json|xml
 const SERVICE_TERMS = ['hilfe', 'help', 'service', 'kundenservice', 'kundendienst', 'faq', 'support', 'kontakt', 'contact', 'policies', 'policy', 'agb', 'fragen', 'info'];
 // A crawled page that looks like help, policy or service content.
 export const SERVICE_PAGE = /hilfe|help|service|faq|support|kontakt|contact|polic|agb|versand|liefer|zahlung|payment|shipping|delivery|return|retour|rückgabe|rueckgabe|garantie|warranty|customer|kunden/i;
+const NOT_SERVICE = /\/(stor(y|ies)|blog|magazin|news|journal)\/|privacy|datenschutz|cookie|impressum|legal-notice/i;
 export function isServicePage(page) {
   let path = page.url;
   try { path = decodeURIComponent(new URL(page.url).pathname); } catch {}
+  if (NOT_SERVICE.test(path)) return false;
+  if ((page.text || '').length < 200) return false;   // e.g. a help page rendered only with JavaScript
   return SERVICE_PAGE.test(`${path} ${page.title || ''}`);
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

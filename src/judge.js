@@ -1,6 +1,7 @@
 // Asks an LLM whether the retrieved page excerpts let a visitor complete the
 // task. Works with any OpenAI-compatible Chat Completions endpoint.
 import { excerpt } from './retrieve.js';
+import { decodeEntities } from './html.js';
 
 const SYSTEM = `You audit whether a website's public content lets a visitor complete a task.
 Use ONLY the page excerpts provided. Do not use outside knowledge about the company.
@@ -43,7 +44,7 @@ export async function judge(task, candidates, { apiKey, model = 'gpt-4o-mini', b
   const data = await res.json();
   const out = JSON.parse(data.choices?.[0]?.message?.content || '{}');
   // A pass must be backed by a quote that really is in what the judge was shown.
-  const norm = (x) => String(x || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  const norm = (x) => decodeEntities(String(x || '')).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
   const quote = out.evidence_quote ? String(out.evidence_quote) : null;
   const quoteFound = Boolean(quote) && norm(passages.join(' ')).includes(norm(quote));
   const fulfilled = Boolean(out.fulfilled) && quoteFound;

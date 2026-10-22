@@ -41,3 +41,9 @@ test('a pass whose quote is not on the page becomes a failure', async () => {
   assert.equal(r.fulfilled, false);
   assert.match(r.reason, /not in the page text/);
 });
+
+test('entities are decoded so umlauts match and quotes verify', async () => {
+  const { cleanHtml, decodeEntities } = await import('../src/html.js');
+  assert.equal(decodeEntities('Geb&uuml;hren &euro; 3,90 &#228; &#xE4; &unknown;'), 'Gebühren € 3,90 ä ä &unknown;');
+  assert.equal(cleanHtml('<body><!-- tracking --><p>Wir &uuml;bernehmen zwei Jahre Garantie</p></body>'), 'Wir übernehmen zwei Jahre Garantie');
+});

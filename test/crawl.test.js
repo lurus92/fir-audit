@@ -29,3 +29,12 @@ test('retrieval ranks the returns page first for a returns task', async () => {
   const top = rankPages({ task: 'What is the return policy?', keywords: ['return', 'refund'] }, pages);
   assert.equal(new URL(top[0].url).pathname, '/help/returns');
 });
+
+test('empty, blog and privacy pages do not count as help content', async () => {
+  const { isServicePage } = await import('../src/crawl.js');
+  const long = 'x'.repeat(300);
+  assert.equal(isServicePage({ url: 'https://s.test/faq/returns', title: 'Returns', text: '' }), false);
+  assert.equal(isServicePage({ url: 'https://s.test/stories/support-shoe-guide', title: 'Support shoes', text: long }), false);
+  assert.equal(isServicePage({ url: 'https://s.test/privacy-policy', title: 'Privacy', text: long }), false);
+  assert.equal(isServicePage({ url: 'https://s.test/hilfe/rueckgabe', title: 'Rückgabe', text: long }), true);
+});
