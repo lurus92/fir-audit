@@ -58,17 +58,24 @@ Reply with JSON only:
  "reason": string (max 200 chars, why it passed or failed)}`;
 
 // Second, independent check on every pass: the verifier sees ONLY the task and
-// the quote, never the page. Catches the two false-pass patterns found in human
+// the quote, never the page. It is deliberately narrow: a first version that
+// also demanded every part of two-part questions disagreed with the human
+// labels on 16 of 18 cases (23 Oct). Catches the two false-pass patterns found in human
 // validation: a quote unrelated to the task (a warranty sentence cited for
 // "how to contact support") and a vague reference ("payment methods as shown
 // on the website").
 const VERIFIER = `You check evidence for a website audit. You get a visitor's question and
-one quote from the website. Decide whether the quote, on its own, gives the
-visitor a specific, usable answer to the question.
-Not sufficient: a quote about a different topic; a reference elsewhere ("see
-our website", "as shown at checkout"); an answer to only one part when the
-question asks two things that both matter (e.g. how to reach support AND when).
-Sufficient: a restrictive answer ("only within Switzerland", "not possible").
+one quote from the website. Decide whether the quote gives a specific, usable
+answer to the core of the question.
+Reject ONLY when:
+- the quote is about a different topic (e.g. a sentence about warranty
+  extensions cited for "how do I contact customer service"), or
+- the quote points elsewhere instead of answering ("with the payment methods
+  shown on the website", "see our FAQ", "visit the help centre").
+Do NOT reject because the question has two parts and the quote answers one of
+them: "2 years warranty" answers a warranty question; "phone Mon-Fri 8-17"
+answers a contact question. Restrictive answers ("only within Switzerland",
+"not possible") are answers.
 Reply with JSON only: {"answers": boolean, "reason": string (max 150 chars)}`;
 
 async function chat(messages, { apiKey, model, baseUrl, fetchImpl }) {
