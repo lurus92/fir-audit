@@ -1,0 +1,69 @@
+{
+  "_about": "Pre-publication outreach to audited shops. Edit wording here, never in code. Placeholders in {{double braces}} are filled per shop; {{first_name}} stays for you to fill. Shop-specific wording for a finding goes in a notes file (site + task_id + missing), passed with --notes.",
+  "sender": {
+    "name": "Luigi Russo",
+    "intro": "an analytics lead based in Zurich (previously TikTok, Vodafone and Sunrise)",
+    "signature": "Luigi Russo\nlrusso.it",
+    "disclosure": "Disclosure: I also build AskVio, an assistant for websites. This study is independent of it, and the results do not depend on whether a shop uses any product."
+  },
+  "study": {
+    "what": "a study of how well AI shopping assistants can use online shops in Switzerland, Germany and Austria",
+    "count": "20",
+    "venue": "MeasureCamp Zurich",
+    "publish_date": "21 November 2026",
+    "reply_by": "13 November",
+    "open_source_date": "20 November"
+  },
+  "subjects": {
+    "readable": "{{shop}} in an AI-agent study: {{answered}} of {{asked}} shopper questions answered",
+    "blocked": "{{shop}} in an AI-agent study: our agent was refused access",
+    "no-help-content": "{{shop}} in an AI-agent study: help pages not readable without JavaScript",
+    "low-coverage": "{{shop}} in an AI-agent study: help pages not readable without JavaScript",
+    "unreachable": "{{shop}} in an AI-agent study: we could not reach your site",
+    "blocked-varied": "{{shop}} in an AI-agent study: our agent was refused access in some checks"
+  },
+  "opening": "Hi {{first_name}},\n\nI'm {{name}}, {{intro}}. I've run {{what}}, and {{shop}} is one of the {{count}} shops in it. I'm presenting the results at {{venue}} and publishing them on {{publish_date}}.\n\nBefore anything is public, every shop gets its own result and the chance to correct it. Here is yours.",
+  "results": {
+    "readable": "Access: an AI agent could read {{shop}}'s help and policy pages ({{service_pages}} pages).\nAnswers: {{shop}} answered {{answered}} of {{asked}} common shopper questions.{{failures_block}}",
+    "blocked": "Access: on {{audit_date}}, {{host}} returned HTTP {{http_status}} to our agent before it could read any page, so we could not test any questions.{{robots_line}}{{runs_line}}",
+    "no-help-content": "Access: our agent reached {{host}}, but the help and policy pages it found had no readable text without JavaScript, so we could not test the questions. Many AI assistants read pages without running JavaScript.",
+    "low-coverage": "Access: our agent reached {{host}}, but found only {{service_pages}} help or policy page(s) with readable text without JavaScript, too few to test the questions fairly. Many AI assistants read pages without running JavaScript.",
+    "unreachable": "Access: on {{audit_date}}, our agent got no response from {{host}}. This may be a network issue on our side, so the study reports it as unreachable, not as blocked, and we will try again before publication.",
+    "blocked-varied": "Access: our agent was refused by {{host}} (HTTP {{http_status}}) in {{blocked_runs}} of {{total_runs}} checks between {{first_check}} and {{last_check}}, and let in during the others. Because the result is not consistent, the study does not report {{shop}} as blocked; we will re-run the full test before publication."
+  },
+  "failures_heading": "\n\nWhat we could not find:",
+  "failure_line": "- {{intent}}: {{missing}}",
+  "no_failures": " We found an answer to every one.",
+  "robots_allowed": " Your robots.txt allows the AI assistants we checked (ChatGPT-User, Claude-User, Perplexity-User), so the study reports {{shop}} as a site that welcomes AI agents in robots.txt but refuses them at the firewall.",
+  "robots_refused": " Your robots.txt was also refused, so we could not read your stated policy for AI agents.",
+  "runs_varied": "",
+  "method": {
+    "readable": "How we tested: on {{audit_date}} an openly identified agent (user agent fir-audit/0.1) read up to 40 public pages of {{host}}, respecting robots.txt, at one request per second, without running JavaScript. It looked for answers to {{asked}} questions shoppers ask before and after buying. Every unanswered question was then checked by hand.",
+    "access": "How we tested: an openly identified agent (user agent fir-audit/0.1) requested public pages of {{host}}, respecting robots.txt, at one request per second, without running JavaScript, as many AI assistants do. It would have looked for answers to {{asked}} questions shoppers ask before and after buying."
+  },
+  "ask": "If anything is wrong, for example a page we missed or a change since {{audit_date}}, reply by {{reply_by}} and I'll re-test and correct the result before publication. I'm also glad to include a short statement from you in the study. I'm happy to share the full method, and the test tool is going open source on {{open_source_date}}.",
+  "missing_by_intent": {
+    "returns-window": "we found no page stating how many days a customer has to return an item.",
+    "returns-cost": "we found no page stating whether returns are free or who pays return shipping.",
+    "shipping-cost": "we found no page stating shipping costs or the free-shipping threshold.",
+    "delivery-time": "we found no page stating how long standard delivery takes.",
+    "countries": "we found no page stating which countries you deliver to.",
+    "payment-methods": "we found no page listing the payment methods you accept.",
+    "invoice": "we found no page stating whether a customer can pay by invoice.",
+    "contact": "we found no page explaining how to reach customer service and when.",
+    "track-order": "we found no page explaining how a customer tracks an order once it has shipped.",
+    "warranty": "we found no page explaining how long the warranty runs and how to make a claim."
+  },
+  "intent_names": {
+    "returns-window": "Returns window",
+    "returns-cost": "Return cost",
+    "shipping-cost": "Shipping cost",
+    "delivery-time": "Delivery time",
+    "countries": "Delivery countries",
+    "payment-methods": "Payment methods",
+    "invoice": "Invoice payment",
+    "contact": "Contact",
+    "track-order": "Order tracking",
+    "warranty": "Warranty"
+  }
+}

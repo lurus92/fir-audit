@@ -9,13 +9,15 @@
     "fir-access": "bin/fir-access.js",
     "fir-validate": "bin/fir-validate.js",
     "fir-rescore": "bin/fir-rescore.js",
-    "fir-verify": "bin/fir-verify.js"
+    "fir-verify": "bin/fir-verify.js",
+    "fir-outreach": "bin/fir-outreach.js"
   },
   "files": [
     "bin",
+    "sites",
     "src",
     "tasks",
-    "sites"
+    "templates"
   ],
   "scripts": {
     "test": "node --test"
