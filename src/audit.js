@@ -63,7 +63,7 @@ export async function audit(url, tasks, opts = {}) {
     if (dryRun) { results.push(row); continue; }
     log(`  judging  ${task.id}`);
     const judged = await judge(task, candidates, { ...opts.llm, fetchImpl });
-    results.push({ ...row, ...(opts.verify === false ? judged : await withVerifier(judged, task.task, { ...opts.llm, fetchImpl })) });
+    results.push({ ...row, ...(opts.verify === true ? await withVerifier(judged, task.task, { ...opts.llm, fetchImpl }) : judged) });
   }
 
   return { ...base, access: { status: 'ok' }, warnings, summary: dryRun ? null : failedIntentRate(results, threshold), results };

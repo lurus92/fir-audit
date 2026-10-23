@@ -60,7 +60,9 @@ Reply with JSON only:
 // Second, independent check on every pass: the verifier sees ONLY the task and
 // the quote, never the page. It is deliberately narrow: a first version that
 // also demanded every part of two-part questions disagreed with the human
-// labels on 16 of 18 cases (23 Oct). Catches the two false-pass patterns found in human
+// labels on 16 of 18 cases (23 Oct). The narrowed version still rejected
+// restrictive answers it was told to accept (10 of 54 disagreements with
+// humans, gpt-4o-mini), so it is OFF by default (audit option verify: true). Catches the two false-pass patterns found in human
 // validation: a quote unrelated to the task (a warranty sentence cited for
 // "how to contact support") and a vague reference ("payment methods as shown
 // on the website").
