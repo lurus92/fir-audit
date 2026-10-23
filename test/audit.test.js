@@ -13,6 +13,10 @@ test('end to end: crawl, judge with a stubbed LLM, score', async () => {
   const site = fakeSite(pages);
   const fetchImpl = async (url, init) => {
     if (String(url).includes('/chat/completions')) {
+      const body = JSON.parse(init.body);
+      if (body.messages[0].content.startsWith('You check evidence')) {
+        return { ok: true, json: async () => ({ choices: [{ message: { content: '{"answers":true,"reason":"ok"}' } }] }) };
+      }
       const asksReturns = JSON.parse(init.body).messages[1].content.includes('return');
       const verdict = asksReturns
         ? { fulfilled: true, confidence: 0.9, evidence_url: 'https://shop.test/help/returns', evidence_quote: 'within 30 days for a full refund', answer: '30 days', reason: 'Policy states 30 days.' }

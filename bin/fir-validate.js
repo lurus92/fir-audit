@@ -4,6 +4,9 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { sampleVerdicts, agreement } from '../src/validate.js';
+import { applyHumanVerdicts } from '../src/finalize.js';
+import { toCsv } from '../src/batch.js';
+import { mkdir } from 'node:fs/promises';
 
 const [cmd, target, ...rest] = process.argv.slice(2);
 const n = Number(rest[rest.indexOf('--n') + 1]) || 50;
@@ -49,7 +52,32 @@ if (cmd === 'sample' && target) {
   console.log(`Checked: ${a.total}`);
   console.log(`Agreement: ${Math.round(a.agreement * 100)}%   Cohen's kappa: ${a.kappa.toFixed(2)}`);
   console.log(`Judge passed, human failed: ${a.false_pass}   Judge failed, human passed: ${a.false_fail}`);
+} else if (cmd === 'apply' && target) {
+  // fir-validate apply <report-dir> <validation.csv> [more.csv ...]  ->  <report-dir>-final
+  const csvs = rest.filter((x) => x.endsWith('.csv'));
+  const labels = [];
+  for (const c of csvs) labels.push(...parseCsv(await readFile(c, 'utf8')));
+  const files = (await readdir(target)).filter((f) => f.endsWith('.json')).sort();
+  const reports = [];
+  for (const f of files) reports.push(JSON.parse(await readFile(join(target, f), 'utf8')));
+  const final = applyHumanVerdicts(reports, labels);
+  const out = `${target.replace(/\/$/, '')}-final`;
+  await mkdir(out, { recursive: true });
+  const rows = [];
+  for (const [i, r] of final.entries()) {
+    await writeFile(join(out, files[i]), JSON.stringify(r, null, 2));
+    rows.push({ name: new URL(r.site).host.replace(/^www\./, ''), url: r.site, status: r.access.status, pages: r.crawl.pagesFetched,
+      service_pages: r.crawl.servicePages?.length ?? 0, tasks_matched: r.results.filter((x) => x.candidates?.length).length,
+      tasks_total: r.results.length || '', fir: r.summary?.fir, failed: r.summary?.failed,
+      note: r.verification ? `${r.verification.failures_human_confirmed}/${r.verification.failures_total} failures human-confirmed` : (r.access.reason || '') });
+  }
+  await writeFile(join(out, 'summary.csv'), toCsv(rows));
+  const v = final.filter((r) => r.verification);
+  const sum = (k) => v.reduce((n, r) => n + r.verification[k], 0);
+  console.log(`Applied ${labels.length} human labels to ${v.length} scored sites.`);
+  console.log(`Failures: ${sum('failures_total')}, human-confirmed: ${sum('failures_human_confirmed')}. Human-checked results: ${sum('human_checked')}.`);
+  console.log(`Final: ${out}`);
 } else {
-  console.log('Usage:\n  fir-validate sample <report-dir> [--n 50]\n  fir-validate score <validation.csv>');
+  console.log('Usage:\n  fir-validate sample <report-dir> [--n 50]\n  fir-validate score <validation.csv>\n  fir-validate apply <report-dir> <validation.csv> [more.csv ...]');
   process.exit(1);
 }

@@ -66,7 +66,7 @@ export function extractLinks(html, baseUrl) {
   let m;
   while ((m = re.exec(String(html || ''))) !== null) {
     let href;
-    try { href = new URL(m[1].trim(), baseUrl).toString(); } catch { continue; }
+    try { href = new URL(decodeEntities(m[1].trim()), baseUrl).toString(); } catch { continue; }
     if (!href.startsWith('http') || seen.has(href)) continue;
     seen.add(href);
     links.push({ href, text: cleanHtml(m[2] || '', 120) || href });

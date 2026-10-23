@@ -8,7 +8,8 @@
     "fir-batch": "bin/fir-batch.js",
     "fir-access": "bin/fir-access.js",
     "fir-validate": "bin/fir-validate.js",
-    "fir-rescore": "bin/fir-rescore.js"
+    "fir-rescore": "bin/fir-rescore.js",
+    "fir-verify": "bin/fir-verify.js"
   },
   "files": [
     "bin",

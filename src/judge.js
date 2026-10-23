@@ -5,30 +5,35 @@ import { decodeEntities } from './html.js';
 
 const norm = (x) => decodeEntities(String(x || '')).normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 
-// The judge often joins non-adjacent passages with "..." (22 Oct run: 15 of 15
-// rejected quotes were real text stitched this way). Each fragment must appear
-// in the excerpts; a fragment of 3+ words may differ by at most 20% of its
-// 3-word sequences (the judge trims clauses), never be invented.
+// Is the judge's evidence quote really in the page? The judge stitches
+// passages with "...", drops clauses ("Brack AG [bzw. der Lieferant]
+// übernimmt") and reorders a sentence ("Lieferzeit nach dem Versand beträgt" /
+// "beträgt die Lieferzeit nach dem Versand"); markup can split a word
+// ("L ieferung"). Each fragment must be found exactly, or ≥90% of its words
+// must occur together within a short span of the page. Invented content (a
+// number, a scope like "alle Produkte") fails.
 export function verifyQuote(quote, text) {
   if (!quote) return false;
   const t = norm(text);
-  const pairs = String(quote).split(/\.{3,}|…/).map((raw) => ({ raw, f: norm(raw) })).filter((p) => p.f.length >= 3);
-  const frags = pairs.map((p) => p.f);
-  const rawFrags = pairs.map((p) => p.raw);
+  const tWords = t.split(' ');
+  const despaced = t.replace(/ /g, '');
+  const frags = String(quote).split(/\.{3,}|…/).map(norm).filter((f) => f.length >= 3);
   if (!frags.length) return false;
-  return frags.every((raw, idx) => {
-    const f = raw;
-    if (t.includes(f)) return true;
-    const w = f.split(' ');
-    if (w.length < 5) return false;
-    const grams = w.length - 2;
-    let hit = 0;
-    for (let i = 0; i < grams; i++) if (t.includes(w.slice(i, i + 3).join(' '))) hit += 1;
-    if (hit / grams >= 0.8) return true;
-    // A condensed list ("Kreditkarte (Visa und Mastercard), PayPal, Kauf auf
-    // Rechnung"): accept when every item is on the page.
-    const items = (rawFrags[idx] ?? '').split(/[,;:()]|\bund\b|\band\b|\bet\b|\be\b/i).map(norm).filter((x) => x.length >= 3);
-    return items.length >= 2 && items.every((x) => t.includes(x));
+  return frags.every((f) => {
+    if (t.includes(f) || despaced.includes(f.replace(/ /g, ''))) return true;
+    const words = [...new Set(f.split(' '))];
+    if (words.length < 4) return false;
+    const need = Math.ceil(words.length * 0.9);
+    const span = Math.max(words.length * 2, words.length + 8);
+    const want = new Set(words);
+    for (let s = 0; s + 1 <= tWords.length; s += 1) {
+      if (!want.has(tWords[s])) continue;
+      const seen = new Set(tWords.slice(s, s + span).filter((w) => want.has(w)));
+      if (seen.size >= need) return true;
+    }
+    // A word split by markup: count it if its despaced form is in the span-free text.
+    const found = words.filter((w) => tWords.includes(w) || (w.length >= 6 && despaced.includes(w))).length;
+    return found >= need && words.length >= 8 && t.includes(words.slice(0, 2).join(' '));
   });
 }
 
@@ -51,6 +56,47 @@ Reply with JSON only:
  "evidence_url": string or null, "evidence_quote": string or null,
  "answer": string (max 200 chars),
  "reason": string (max 200 chars, why it passed or failed)}`;
+
+// Second, independent check on every pass: the verifier sees ONLY the task and
+// the quote, never the page. Catches the two false-pass patterns found in human
+// validation: a quote unrelated to the task (a warranty sentence cited for
+// "how to contact support") and a vague reference ("payment methods as shown
+// on the website").
+const VERIFIER = `You check evidence for a website audit. You get a visitor's question and
+one quote from the website. Decide whether the quote, on its own, gives the
+visitor a specific, usable answer to the question.
+Not sufficient: a quote about a different topic; a reference elsewhere ("see
+our website", "as shown at checkout"); an answer to only one part when the
+question asks two things that both matter (e.g. how to reach support AND when).
+Sufficient: a restrictive answer ("only within Switzerland", "not possible").
+Reply with JSON only: {"answers": boolean, "reason": string (max 150 chars)}`;
+
+async function chat(messages, { apiKey, model, baseUrl, fetchImpl }) {
+  const res = await fetchImpl(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ model, temperature: 0, response_format: { type: 'json_object' }, messages }),
+  });
+  if (!res.ok) throw new Error(`LLM request failed: ${res.status} ${await res.text()}`);
+  const data = await res.json();
+  return JSON.parse(data.choices?.[0]?.message?.content || '{}');
+}
+
+export async function verifyPass(taskText, quote, { apiKey, model = 'gpt-4o-mini', baseUrl = 'https://api.openai.com/v1', fetchImpl = fetch } = {}) {
+  const out = await chat([
+    { role: 'system', content: VERIFIER },
+    { role: 'user', content: `Question: ${taskText}\n\nQuote: ${quote}` },
+  ], { apiKey, model, baseUrl, fetchImpl });
+  return { answers: Boolean(out.answers), reason: String(out.reason || '') };
+}
+
+// Apply the verifier to a judged result; a rejected pass becomes a failure.
+export async function withVerifier(result, taskText, llm) {
+  if (!result.fulfilled) return result;
+  const v = await verifyPass(taskText, result.evidence_quote, llm);
+  if (v.answers) return { ...result, verifier: 'confirmed' };
+  return { ...result, fulfilled: false, verifier: 'rejected', reason: `Quote does not answer the task on its own: ${v.reason} (judge: ${result.reason})` };
+}
 
 export async function judge(task, candidates, { apiKey, model = 'gpt-4o-mini', baseUrl = 'https://api.openai.com/v1', fetchImpl = fetch } = {}) {
   if (!candidates.length) {

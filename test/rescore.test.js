@@ -37,3 +37,21 @@ test('locale variants count as one page', async () => {
   const top = rankPages({ task: 'Rückgabe', keywords: ['retouren'] }, pages);
   assert.equal(top.length, 2);
 });
+
+test('quotes with dropped clauses, reordering or split words verify; inventions do not', () => {
+  const brack = 'Garantie Brack AG bzw. der Lieferant/Hersteller übernimmt während 2 Jahren nach der Lieferung bzw. Abholung die Garantie für die Mängelfreiheit.';
+  assert.equal(verifyQuote('Brack AG übernimmt während 2 Jahren nach der Lieferung ... die Garantie für die Mängelfreiheit', brack), true);
+  const mammut = 'Sobald wir deine Bestellung versandt haben, beträgt die Lieferzeit nach dem Versand in der Regel 3-5 Werktage.';
+  assert.equal(verifyQuote('Lieferzeit nach dem Versand beträgt in der Regel 3-5 Werktage.', mammut), true);
+  assert.equal(verifyQuote('Lieferzeit nach dem Versand beträgt in der Regel 1-2 Werktage.', mammut), false);
+  const manor = '4. Verfolgen Sie die L ieferung in Ihrem Konto und erhalten Sie Updates per E-Mail.';
+  assert.equal(verifyQuote('Verfolgen Sie die Lieferung in Ihrem Konto und erhalten Sie Updates per E-Mail.', manor), true);
+  const barry = 'Für das Barryvox ohne Batterien gilt ab dem Kaufdatum eine 2-jährige Garantie.';
+  assert.equal(verifyQuote('Für alle Produkte gilt eine 2-jährige Garantie.', barry), false);
+});
+
+test('links with &amp; in href are decoded', async () => {
+  const { extractLinks } = await import('../src/html.js');
+  const [l] = extractLinks('<a href="/c/service?question=68238&amp;category=0">Versand</a>', 'https://t.de/');
+  assert.equal(l.href, 'https://t.de/c/service?question=68238&category=0');
+});

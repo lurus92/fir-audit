@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { crawl, isServicePage } from './crawl.js';
 import { rankPages } from './retrieve.js';
-import { judge } from './judge.js';
+import { judge, withVerifier } from './judge.js';
 import { classifyIntent } from './intent.js';
 import { failedIntentRate } from './score.js';
 
@@ -62,7 +62,8 @@ export async function audit(url, tasks, opts = {}) {
     const row = { id: task.id, task: task.task, intent: task.intent, candidates: candidates.map((c) => c.url) };
     if (dryRun) { results.push(row); continue; }
     log(`  judging  ${task.id}`);
-    results.push({ ...row, ...(await judge(task, candidates, { ...opts.llm, fetchImpl })) });
+    const judged = await judge(task, candidates, { ...opts.llm, fetchImpl });
+    results.push({ ...row, ...(opts.verify === false ? judged : await withVerifier(judged, task.task, { ...opts.llm, fetchImpl })) });
   }
 
   return { ...base, access: { status: 'ok' }, warnings, summary: dryRun ? null : failedIntentRate(results, threshold), results };

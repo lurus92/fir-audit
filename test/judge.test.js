@@ -47,3 +47,18 @@ test('entities are decoded so umlauts match and quotes verify', async () => {
   assert.equal(decodeEntities('Geb&uuml;hren &euro; 3,90 &#228; &#xE4; &unknown;'), 'Gebühren € 3,90 ä ä &unknown;');
   assert.equal(cleanHtml('<body><!-- tracking --><p>Wir &uuml;bernehmen zwei Jahre Garantie</p></body>'), 'Wir übernehmen zwei Jahre Garantie');
 });
+
+test('the verifier turns an unsupported pass into a failure', async () => {
+  const { withVerifier } = await import('../src/judge.js');
+  const fetchImpl = async (url, init) => {
+    const q = JSON.parse(init.body).messages[1].content;
+    const answers = !q.includes('auf der Website angegebenen');
+    return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify({ answers, reason: answers ? 'lists methods' : 'refers elsewhere' }) } }] }) };
+  };
+  const llm = { apiKey: 'k', model: 'm', baseUrl: 'https://x', fetchImpl };
+  const vague = await withVerifier({ fulfilled: true, confidence: 1, evidence_quote: 'mit den auf der Website angegebenen Zahlungsmitteln', reason: 'ok' }, 'Which payment methods?', llm);
+  assert.equal(vague.fulfilled, false);
+  assert.equal(vague.verifier, 'rejected');
+  const good = await withVerifier({ fulfilled: true, confidence: 1, evidence_quote: 'TWINT, Visa, Mastercard, Rechnung', reason: 'ok' }, 'Which payment methods?', llm);
+  assert.equal(good.verifier, 'confirmed');
+});
