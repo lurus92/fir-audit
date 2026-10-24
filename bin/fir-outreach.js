@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // fir-outreach <run-dir> --sites <sites.json> [--access a.csv b.csv ...] [--notes notes.json]
 //              [--template templates/outreach-en.json] [--out outreach/<date>]
+//              [--runs <extra-audit.json> ...]
 // Writes one <site>.md per shop (subject + body) and outreach.csv for mail merge.
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -32,6 +33,12 @@ for (const f of list('--access')) {
   accessRows.push(...parseCsv(await readFile(f, 'utf8')));
   const d = f.match(/(\d{4}-\d{2}-\d{2})/)?.[1];
   if (d) accessDates.push(`${d}T12:00:00.000Z`);
+}
+// Extra full-audit runs of a site (e.g. a re-audit) count as access checks too.
+for (const f of list('--runs')) {
+  const r = JSON.parse(await readFile(f, 'utf8'));
+  accessRows.push({ url: r.site.replace(/\/$/, ''), crawler: r.access.status === 'blocked' ? 'blocked' : 'ok' });
+  accessDates.push(r.auditedAt);
 }
 const notesFile = one('--notes');
 const notes = notesFile ? JSON.parse(await readFile(notesFile, 'utf8')) : [];
