@@ -26,7 +26,8 @@ function parseCsv(text) {
 const template = JSON.parse(await readFile(one('--template', 'templates/outreach-en.json'), 'utf8'));
 const sitesFile = one('--sites');
 const sites = sitesFile ? JSON.parse(await readFile(sitesFile, 'utf8')).sites : [];
-const nameOf = (url) => sites.find((s) => new URL(s.url).host === new URL(url).host)?.name;
+// Display name without our internal country tag ("XXXLutz AT" -> "XXXLutz").
+const nameOf = (url) => sites.find((s) => new URL(s.url).host === new URL(url).host)?.name?.replace(/ (CH|DE|AT|UK|UAE)$/, '');
 const accessRows = [];
 const accessDates = [];
 for (const f of list('--access')) {

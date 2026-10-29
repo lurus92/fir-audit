@@ -4,7 +4,7 @@
     "name": "Luigi Russo",
     "intro": "an analytics lead based in Zurich (previously TikTok, Vodafone and Sunrise)",
     "signature": "Luigi Russo\nlrusso.it",
-    "disclosure": "Disclosure: I also build AskVio, an assistant for websites. This study is independent of it, and the results do not depend on whether a shop uses any product."
+    "disclosure": "Disclosure: I also build AskVio, an assistant for websites. This study is independent of AskVio, and a shop's result doesn't depend on using it."
   },
   "study": {
     "what": "a study of how well AI shopping assistants can use online shops in Switzerland, Germany and Austria",
@@ -22,12 +22,12 @@
     "unreachable": "{{shop}} in an AI-agent study: we could not reach your site",
     "blocked-varied": "{{shop}} in an AI-agent study: our agent was refused access in some checks"
   },
-  "opening": "Hi {{first_name}},\n\nI'm {{name}}, {{intro}}. I've run {{what}}, and {{shop}} is one of the {{count}} shops in it. I'm presenting the results at {{venue}} and publishing them on {{publish_date}}.\n\nBefore anything is public, every shop gets its own result and the chance to correct it. Here is yours.",
+  "opening": "Dear {{first_name}},\n\nI'm {{name}}, {{intro}}. I've run {{what}}, and {{shop}} is one of the {{count}} shops in it. I'm presenting the results at {{venue}} and publishing them on {{publish_date}}.\n\nBefore anything is public, every shop gets its own result and the chance to correct it. Here is yours.",
   "results": {
     "readable": "Access: an AI agent could read {{shop}}'s help and policy pages ({{service_pages}} pages).\nAnswers: {{shop}} answered {{answered}} of {{asked}} common shopper questions.{{failures_block}}",
     "blocked": "Access: on {{audit_date}}, {{host}} returned HTTP {{http_status}} to our agent before it could read any page, so we could not test any questions.{{robots_line}}{{runs_line}}",
-    "no-help-content": "Access: our agent reached {{host}}, but the help and policy pages it found had no readable text without JavaScript, so we could not test the questions. Many AI assistants read pages without running JavaScript.",
-    "low-coverage": "Access: our agent reached {{host}}, but found only {{service_pages}} help or policy page(s) with readable text without JavaScript, too few to test the questions fairly. Many AI assistants read pages without running JavaScript.",
+    "no-help-content": "Access: our agent reached {{host}}, but could not find any help or policy page with readable text without JavaScript, so we could not test the questions. Many AI assistants read pages without running JavaScript.",
+    "low-coverage": "Access: our agent reached {{host}}, but found only {{service_pages}} help or policy pages with readable text without JavaScript, too few to test the questions fairly. Many AI assistants read pages without running JavaScript.",
     "unreachable": "Access: on {{audit_date}}, our agent got no response from {{host}}. This may be a network issue on our side, so the study reports it as unreachable, not as blocked, and we will try again before publication.",
     "blocked-varied": "Access: our agent was refused by {{host}} (HTTP {{http_status}}) in {{blocked_runs}} of {{total_runs}} checks between {{first_check}} and {{last_check}}, and let in during the others. Because the result is not consistent, the study does not report {{shop}} as blocked; we will re-run the full test before publication."
   },
