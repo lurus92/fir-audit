@@ -92,7 +92,7 @@ Included: `sites/dach-pilot.json` (20 DACH shops) with `tasks/dach-ecommerce.jso
 ## How it works
 
 1. **Crawl, politely.** Same-site pages only, `robots.txt` respected (including `Crawl-delay`), at most one request per second by default, identified as `fir-audit/0.1 (+https://github.com/lurus92/fir-audit)`. Links that match the tasks' keywords are fetched first, so a small page budget covers the pages that matter.
-2. **Retrieve.** For each task, rank crawled pages by relevance and keep the top 3.
+2. **Retrieve.** For each task, rank crawled pages by relevance and keep the top 5.
 3. **Judge.** An LLM reads only those excerpts (no outside knowledge about the company) and decides whether a visitor could complete the task, with a confidence score, the evidence URL, and a one-line reason.
 4. **Score.** FIR overall and per intent category, plus every verdict and its evidence in the JSON report, so any result can be checked by hand.
 
